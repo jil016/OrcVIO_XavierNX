@@ -1,0 +1,137 @@
+    8  cd jetson-inference/build/
+    9  cmake ..
+   10  make -j4
+   11  cd ../
+   12  rm -r build
+   13  mkdir build
+   14  cd build/
+   15  cmake ../
+   16  make -j2
+   17  sudo make install
+   18  sudo ldconfig
+   19  cd aarch64/bin/
+   20  ./imagenet images/orange_0.jpg images/test/output_0.jpg
+   21  ./imagenet.py images/strawberry_0.jpg images/test/output_1.jpg
+   22  ./imagenet.py images/strawberry_0.jpg
+   23  ls
+   24  wget https://nvidia.box.com/shared/static/tlswont1jnyu3ix2tbf7utaekpzcx4rc.mkv -O jellyfish.mkv
+   25  ./imagenet --network=resnet-18 jellyfish.mkv images/test/jellyfish_resnet18.mkv
+   26  sudo apt-get install ros-melodic-image-transport ros-melodic-vision-msgs
+   27  pwd
+   28  cd 
+   
+
+   37  cd /media/erl/erl/
+   38  ls
+   39  mkdir -p jetson_ros_ws/src
+   40  cd jetson_ros_ws/src/
+   41  catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+   42  cd ..
+   43  catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+   44  source /opt/ros/melodic/setup.bash 
+   45  catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+   46  catkin_make
+   47  sudo apt install catkin_pkg
+   48  pip install catkin_pkg
+   49  pip3 install catkin_pkg
+   50  source /opt/ros/melodic/setup.bash 
+   51  catkin
+   52  catkin_make
+   53  ls
+   54  catkin_make
+   55  cd src/
+   56  git clone https://github.com/dusty-nv/ros_deep_learning
+   57  cd ../
+   58  catkin_make
+   59  source devel/setup.bash 
+   60  roscore
+   61  source devel/setup.bash 
+   62  roslaunch ros_deep_learning video_viewer.ros1.launch input:=csi://0 output:=display://0
+   63  roslaunch ros_deep_learning video_viewer.ros1.launch input:=/media/erl/erl/jetson-inference/build/aarch64/bin/jellyfish.mkv output:=display://0
+   64  roslaunch ros_deep_learning imagenet.ros1.launch input:=/media/erl/erl/jetson-inference/build/aarch64/bin/jellyfish.mkv output:=display://0
+   65  roslaunch ros_deep_learning detectnet.ros1.launch input:=/media/erl/erl/jetson-inference/build/aarch64/bin/jellyfish.mkv output:=display://0
+   66  roslaunch ros_deep_learning video_viewer.ros1.launch input:=csi://0 output:=display://0
+   67  roslaunch ros_deep_learning video_viewer.ros1.launch input:=/media/erl/erl/jetson-inference/build/aarch64/bin/jellyfish.mkv output:=display://0
+   68  source devel/setup.bash 
+   69  rostopic list
+   70  apt list -a libopencv-dev
+   71  sudo ln -s /usr/include/opencv4/ /usr/include/opencv
+   72  source devel/setup.bash 
+   73  rostopic list
+   74  rosrun rviz rviz 
+
+
+   75  sudo apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+   76  sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo bionic main" -u
+   77  sudo apt-get install librealsense2-dkms
+   78  sudo apt-get install librealsense2-utils
+   79  sudo apt-get install librealsense2-dev
+   80  sudo apt-get install librealsense2-dbg
+   81  modinfo uvcvideo | grep "version:"
+   82  realsense-viewer
+
+
+   83  cd /media/erl/erl/
+   84  ls
+   85  mkdir -p realsense_ros_ws/src
+   86  cd realsense_ros_ws/src
+   87  git clone https://github.com/IntelRealSense/realsense-ros.git
+   88  cd realsense-ros/
+   89  git checkout `git tag | sort -V | grep -P "^2.\d+\.\d+" | tail -1`
+   90  cd ..
+   91  sudo apt install ros-melodic-ddynamic-reconfigure
+   92  catkin_init_workspace
+   93  source /opt/ros/melodic/setup.bash 
+   94  catkin_init_workspace
+   95  cd ..
+   96  catkin_make clean
+   97  catkin_make -DCATKIN_ENABLE_TESTING=False -DCMAKE_BUILD_TYPE=Release
+
+
+
+   98  cd src
+   99  git clone https://github.com/ros-perception/vision_opencv
+  100  cd ../
+  101  catkin_make clean
+  102  catkin build
+  103  sudo apt-get install python-catkin-tools
+  104  catkin build
+  105  catkin clean
+  106  catkin build
+  107  catkin clean
+  108  cd src/
+  109  git clone https://github.com/ros-perception/vision_opencv
+  110  cd ../
+  111  catkin build
+  112  sudo apt install libboost-all-dev
+  113  sudo apt-get install cmake libblkid-dev e2fslibs-dev libboost-all-dev libaudit-dev
+  114  catkin build
+  115  python
+  116  pip install install boost-python
+  117  sudo apt install boost-python
+  118  cd src/
+  119  ls
+  120  cd vision_opencv/
+  121  ls
+  122  cd cv_bridge/
+  123  ls
+  124  cd ../
+  125  git log
+  126  git checkout melodic
+  127  cd ../../
+  128  catkin clean
+  129  catkin build
+  130  sudo apt-get install ros-melodic-cv-bridge
+  131  sudo apt-get install ros-melodic-vision-opencv
+  132  sudo apt-get update
+  133  pkg-config --cflags opencv
+  134  pkg-config --libs opencv
+  135  catkin build
+
+
+  136  source devel/setup.bash 
+  137  roslaunch realsense2_camera rs_d400_and_t265.launch 
+
+
+
+

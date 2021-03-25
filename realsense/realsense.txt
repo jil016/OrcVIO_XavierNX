@@ -1,0 +1,17 @@
+librealsense:
+pre-build packages: https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md
+*source packages: https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md
+
+(1) try pre-build packages
+...No debian package support, sudo apt-get install librealsense2-dkms failed, others succeed, but still worked...
+
+
+(2) try pre-build packages
+(Failed) Build and apply patched kernel modules; ./scripts/patch-realsense-ubuntu-lts.sh
+
+
+(3) realsense-ros
+sudo apt install ros-melodic-ddynamic-reconfigure
+sudo ln -s /usr/local/include/opencv /usr/include/opencv (!!! Not really reasonable, this is because, it uses default cv_bridge which requires usr/include/opencv)
+
+

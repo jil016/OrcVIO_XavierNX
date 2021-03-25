@@ -1,0 +1,137 @@
+NVIDIA-config
+http://docs.ros.org/en/melodic/api/catkin/html/user_guide/installation.html
+SSD setup: https://desertbot.io/blog/jetson-xavier-nx-ssd-setup
+
+(1) ROS
+http://wiki.ros.org/melodic/Installation/Ubuntu
+Follow the instruction to install ros-melodic-desktop-full (recommended) or ros-melodic-desktop (light weight)
+
+**if** install ros-melodic-desktop 
+**need** sudo apt-get install ros-melodic-pcl-conversions ros-melodic-pcl-ros sudo apt-get install ros-melodic-tf2-geometry-msgs ros-melodic-perception 
+
+(2) opencv
+Official Doc: https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
+Candidates:
+3.2.0 -- old enough
+3.4.6 -- tested on desktop
+4.1.1 -- default in Jetson Image
+
+=============== opencv 3.2.0 ================
+a. download opencv 3.2.0 and opencv_contrib 3.2.0
+git clone ...
+git checkout 3.2.0
+
+b. cmake
+mkdir opencv/build && cd opencv/build
+cmake -DOPENCV_EXTRA_MODULES_PATH=...../opencv_contrib/modules -DENABLE_PRECOMPILED_HEADERS=OFF ..
+
+**problem** CMAKE error cuda not linked problem: https://github.com/opencv/opencv_contrib/issues/1478
+**solution** https://stackoverflow.com/questions/46584000/cmake-error-variables-are-set-to-notfound
+
+**problem** Warning: cc1: warning: ‘-Werror=’ argument ‘-Werror=non-virtual-dtor’ is not valid for C
+**solution** ignore this warning, or refer to https://github.com/opencv/opencv/issues/9493
+
+**problem** fatal error: stdlib.h: No such file or directory
+**solution** -DENABLE_PRECOMPILED_HEADERS=OFF, referring to: 
+https://stackoverflow.com/questions/40262928/error-compiling-opencv-fatal-error-stdlib-h-no-such-file-or-directory
+
+c. make
+d. make install
+
+**problem** When running orcvio: OpenCV Error: Unspecified error (The function is not implemented. Rebuild the library with Windows, GTK+ 2.x or Carbon support. If you are on Ubuntu or Debian, install libgtk2.0-dev and pkg-config
+ - uninstall opencv3.2.0 by sudo make uninstall
+ - sudo apt-get install libgtk2.0-dev
+ - cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_V4L=ON -D WITH_QT=ON -D WITH_GTK=ON -D WITH_OPENGL=ON -D OPENCV_EXTRA_MODULES_PATH=/home/erl/DCIST/OrcVIO/Libraries/opencv_contrib/modules -D ENABLE_PRECOMPILED_HEADERS=OFF -D ENABLE_CXX11=ON ..
+
+But then:
+**problem** cuda_gl_interop.h:63:2: error: #error Please include the appropriate gl headers before including cuda_gl_interop.h
+**solution** Patch the header file as follow:
+ - https://forums.developer.nvidia.com/t/building-opencv-with-opengl-support/49741/3
+ - https://github.com/opencv/opencv/issues/5205
+ - cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_V4L=ON -D WITH_GTK=ON -DOPENCV_EXTRA_MODULES_PATH=/home/erl/DCIST/OrcVIO/Libraries/opencv_contrib/modules -DENABLE_PRECOMPILED_HEADERS=OFF -D ENABLE_CXX11=ON ..
+
+=============================================
+
+=========== default opencv 4.1.1 ============
+**problem** "opencv/cv.hpp" included by OrcVIO_Lite/ros_wrapper/src/orcvio/include/ObjectInitNode.h is deprecated
+
+**problem** opencv_contrib was not installed. There is no available standalone installation of opencv_contrib
+=============================================
+
+============== opencv 3.4.6 =================
+Instruction 1:
+ - https://www.jetsonhacks.com/2018/11/08/build-opencv-3-4-on-nvidia-jetson-agx-xavier-developer-kit/
+ - https://github.com/jetsonhacks/buildOpenCVXavier.git
+
+Instruction 2:
+ - https://blog.csdn.net/hongge_smile/article/details/109456034
+ - https://blog.csdn.net/ysten618/article/details/106691236
+
+**problem** 
+In file included from opencv/modules/python/src2/cv2.cpp:107:0:
+~/DCIST-OrcVIO/Libraries/opencv/build/modules/python_bindings_generator/pyopencv_generated_include.h:15:10: fatal error: opencv2/hdf/hdf5.hpp: No such file or directory
+**solution**
+https://github.com/opencv/opencv/issues/6050;
+https://zhuanlan.zhihu.com/p/52360498
+
+
+**problem** 
+In file included from opencv/modules/python/src2/cv2.cpp:107:0:
+opencv/build/modules/python_bindings_generator/pyopencv_generated_include.h:39:10: fatal error: opencv2/viz/types.hpp: No such file or directory
+**solution**
+https://stackoverflow.com/questions/23559925/how-do-i-use-install-viz-in-opencv
+###################################################
+After 3.2.0 failure (darknet_ros, too old)
+
+build with:
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_V4L=ON -D WITH_GTK=ON -DOPENCV_EXTRA_MODULES_PATH=/home/erl/DCIST/OrcVIO/Libraries/opencv-3.4.6/opencv_contrib/modules -DENABLE_PRECOMPILED_HEADERS=OFF -D ENABLE_CXX11=ON ..
+
+**make failed** reported errors with ceres-solver.
+
+Then, try:
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_V4L=ON -D WITH_GTK=ON -DOPENCV_EXTRA_MODULES_PATH=/home/erl/DCIST/OrcVIO/Libraries/opencv-3.4.6/opencv_contrib/modules -DENABLE_PRECOMPILED_HEADERS=OFF .. (CXX11 may conflict with ceres-solver? not sure why)
+
+failed, back to original, just give it a try
+cmake -DOPENCV_EXTRA_MODULES_PATH=/home/erl/DCIST/OrcVIO/Libraries/opencv-3.4.6/opencv_contrib/modules ..
+
+Succeed?!...why?
+
+
+Problem found:
+ - opencv is old, 2019-4-08
+ - ceres-solver 2.X.X is up-to-dated, downloaded on 2021-3-21
+ - ceres requires c++14, while old opencv uses c++11
+Solution:
+ - try -DCMAKE_CXX_STANDARD=14 for opencv
+ - try older ceres-solver
+reference: 
+ - https://github.com/colmap/colmap/issues/905, reinstall old ceres?
+ - https://github.com/opencv/opencv_contrib/issues/2578 yeah...old version must help
+ - https://github.com/opencv/opencv_contrib/pull/2732 , fixed but old version might... 
+
+
+Rebuild orcvio succeed, last time we experienced file-not-found error
+looks great, no opencv issue was found with roslaunch orcvio orcvio_rs_d435i_online.launch
+
+Try darknet
+
+
+===================================================
+
+(3) cv_bridge
+cd OrcVIO_Lite/ros_wrapper/src
+git clone vision_opencv
+
+**problem** Could not find the following Boost libraries: boost_python37
+**solution** https://github.com/ros-perception/vision_opencv/issues/341; change "boost37" to "boost3"
+
+**problem** vision_opencv/cv_bridge/src/module.hpp: In function ‘int do_numpy_import()’:
+/usr/include/python2.7/numpy/__multiarray_api.h:1537:144: error: return-statement with no value, in function returning ‘int’ [-fpermissive]:
+-- https://github.com/ros-perception/vision_opencv/issues/205
+
+
+(4) OrcVIO
+Ceres(SuiteSparse required): http://ceres-solver.org/installation.html
+Sophus: download; cmake ..; make install
+
+

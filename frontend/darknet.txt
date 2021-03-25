@@ -1,0 +1,115 @@
+/home/erl/DCIST/Frontend/darknet_ws/src/darknet_ros/darknet_ros/src/YoloObjectDetector.cpp:613:23: error: ‘cvIplImage’ was not declared in this scope
+     *self = cvIplImage(m);
+             ~~~~~~~~~~^~~
+/home/erl/DCIST/Frontend/darknet_ws/src/darknet_ros/darknet_ros/src/YoloObjectDetector.cpp:613:23: note: suggested alternative: ‘IplImage’
+     *self = cvIplImage(m);
+             ~~~~~~~~~~^~~
+
+
+OPENCV 3.2.0 MIGHT BE TOO OLD
+many weird problems
+
+Try opencv3.4.6 after 3.2.0 failure
+
+CMake Error at /opt/ros/melodic/share/cv_bridge/cmake/cv_bridgeConfig.cmake:113 (message):
+  Project 'cv_bridge' specifies '/usr/include/opencv' as an include dir,
+  which is not found. 
+
+****didn't install default cv_bridge
+(1) try to install (didn't try)
+    - sudo apt-get install ros-melodic-cv-bridge
+    - sudo apt-get install ros-melodic-vision-opencv
+
+(2) include cv_bridge in the src folder (choosen)
+    - git clone https://github.com/ros-perception/vision_opencv.git
+
+cv_bridge/CMakeList.txt, patch: boost37 -> boost, opencv4 -> opencv3
+
+comment out:# find_package(Boost REQUIRED python37)
+
+	set(_opencv_version 3)
+	find_package(OpenCV 3 QUIET)
+	if(OpenCV_FOUND)
+	  message(STATUS "find OpenCV 3")
+	endif()
+
+Patch vision_opencv/cv_bridge/src/module.hpp
+
+	static void do_numpy_import( )
+	{
+	    import_array( );
+	    return;
+	}
+
+
+**Error** libtorch.so: error adding symbols: File in wrong format, collect2: error: ld returned 1 exit status
+
+**explaination** binary file is not for arm64. https://github.com/pytorch/pytorch/issues/22116
+
+**solution** 
+discussion: https://discuss.pytorch.org/t/tx2-arm64-install-for-python-3-cont-from-nvidia-forum/27631
+new binary: https://nvidia.app.box.com/v/torch-stable-cp36-jetson-jp42
+
+try pytorch1.8 with default cuda10.2 first as recommended:
+https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-8-0-now-available/72048
+(pytorch1.4 requires cuda 10.0)
+
+libtorch not found
+https://forums.developer.nvidia.com/t/do-jetson-xavier-support-pytorch-c-api/156795
+https://forums.developer.nvidia.com/t/libtorch-cuda-problem/153609
+
+The binary files are compiled with pytorch, you can find them in:
+/home/erl/.local/lib/python3.6/site-packages/torch
+
+for pytorch1.8, we don't need to patch the share/cmake/Caffe2/public/cuda.cmake
+
+
+catkin_make darknet
+#error You need C++14 to compile PyTorch
+Starmap/CMakeList.txt:
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# check c++14 / c++0x
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX14)
+    set(CMAKE_CXX_FLAGS "-std=c++14")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "-std=c++0x")
+else()
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
+endif()
+
+set_target_properties(${PROJECT_NAME}_demo PROPERTIES CXX_STANDARD 14)
+set_target_properties(${PROJECT_NAME}_node PROPERTIES CXX_STANDARD 14)
+
+
+
+In parallel, try to build from source, failed with: 
+usr/include/c++/7/cmath:1302:38: internal compiler error: Segmentation fault
+   { return __builtin_copysignf(__x, __y); }
+
+https://github.com/pytorch/pytorch/issues/51889
+
+
+c++17 required by pytorch: https://answers.ros.org/question/341313/what-happens-if-i-use-c-17-features-in-my-ros-nodes/
+https://github.com/ros/ros_comm/issues/1454
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
