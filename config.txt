@@ -103,7 +103,7 @@ Problem found:
  - ceres requires c++14, while old opencv uses c++11
 Solution:
  - try -DCMAKE_CXX_STANDARD=14 for opencv
- - try older ceres-solver
+ - try older ceres-solver (1.14.0)
 reference: 
  - https://github.com/colmap/colmap/issues/905, reinstall old ceres?
  - https://github.com/opencv/opencv_contrib/issues/2578 yeah...old version must help
@@ -131,7 +131,7 @@ git clone vision_opencv
 
 
 (4) OrcVIO
-Ceres(SuiteSparse required): http://ceres-solver.org/installation.html
+Ceres 1.14.0(SuiteSparse required): http://ceres-solver.org/installation.html 
 Sophus: download; cmake ..; make install
 
 
